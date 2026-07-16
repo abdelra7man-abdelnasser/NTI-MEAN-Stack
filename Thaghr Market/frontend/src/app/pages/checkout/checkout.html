@@ -1,0 +1,193 @@
+<main class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-12">
+  <!-- 3-Step Progress Bar -->
+  <div class="mb-12 max-w-2xl mx-auto">
+    <div class="relative flex items-center justify-between">
+      <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-outline-variant/30"></div>
+      <div class="absolute left-0 top-1/2 -translate-y-1/2 w-[66%] h-0.5 bg-primary-container"></div>
+
+      <div class="relative flex flex-col items-center gap-2">
+        <div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center z-10">
+          <span class="material-symbols-outlined" style="font-size: 20px;">check</span>
+        </div>
+        <span class="font-body-sm text-body-sm font-bold">Cart</span>
+      </div>
+      <div class="relative flex flex-col items-center gap-2">
+        <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center z-10">
+          <span class="material-symbols-outlined" style="font-size: 20px;">local_shipping</span>
+        </div>
+        <span class="font-body-sm text-body-sm font-bold text-secondary">Shipping</span>
+      </div>
+      <div class="relative flex flex-col items-center gap-2">
+        <div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center z-10">
+          <span class="material-symbols-outlined" style="font-size: 20px;">credit_card</span>
+        </div>
+        <span class="font-body-sm text-body-sm text-on-surface-variant">Payment</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+    <!-- Order Summary -->
+    <div class="lg:col-span-1 lg:order-2">
+      <div class="bg-surface-container p-8 rounded-xl border border-outline-variant/30 sticky top-24 space-y-6">
+        <h2 class="font-headline-sm text-headline-sm">Order Summary</h2>
+
+        @if (items().length === 0) {
+          <p class="text-body-sm text-on-surface-variant">Your cart is empty. <a routerLink="/" class="text-secondary underline">Continue shopping</a></p>
+        }
+
+        <div class="space-y-4">
+          @for (item of items(); track $index) {
+            @if (productOf(item); as product) {
+              <div class="flex gap-4 pb-4 border-b border-outline-variant/20 last:border-0">
+                <img class="w-16 h-16 rounded-lg object-cover" [src]="product.images[0].url" [alt]="product.title" />
+                <div class="flex-1">
+                  <p class="font-body-md font-bold leading-tight">{{ product.title }}</p>
+                  
+                  <p class="text-body-sm text-on-surface-variant/70">QTY: {{ item.quantity }}</p>
+                </div>
+                <span class="font-price-md text-price-md">${{ (item.price * item.quantity).toFixed(2) }}</span>
+              </div>
+            }
+          }
+        </div>
+
+        <div class="flex gap-2">
+          <input [(ngModel)]="promoCode" [ngModelOptions]="{standalone: true}" class="flex-1 border border-outline-variant rounded-lg px-4 py-2 text-body-sm" placeholder="Promo code" type="text" />
+          <button class="px-4 py-2 border border-primary rounded-lg font-bold text-body-sm hover:bg-surface-container-low transition-colors">Apply</button>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-outline-variant/20">
+          <div class="flex justify-between text-body-sm">
+            <span class="text-on-surface-variant">Subtotal</span>
+            <span>${{ subtotal().toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between text-body-sm">
+            <span class="text-on-surface-variant">Shipping</span>
+            <span [class.text-green-600]="shipping() === 0">{{ shipping() === 0 ? 'Free' : ('$' + shipping().toFixed(2)) }}</span>
+          </div>
+          <div class="flex justify-between text-body-sm">
+            <span class="text-on-surface-variant">Tax</span>
+            <span>${{ tax().toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-outline-variant/30">
+          <span class="font-headline-sm text-headline-sm">Total</span>
+          <span class="font-price-lg text-price-lg text-secondary">${{ total().toFixed(2) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forms -->
+    <div class="lg:col-span-2 lg:order-1 space-y-12">
+      <!-- Shipping -->
+      <section [formGroup]="shippingForm">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold">1</div>
+          <h2 class="font-headline-md text-headline-md">Shipping Address</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter">
+          <div class="col-span-1">
+            <label class="block font-body-sm font-semibold mb-2">First Name</label>
+            <input formControlName="firstName" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md" placeholder="John" type="text" />
+          </div>
+          <div class="col-span-1">
+            <label class="block font-body-sm font-semibold mb-2">Last Name</label>
+            <input formControlName="lastName" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md" placeholder="Doe" type="text" />
+          </div>
+          <div class="col-span-2">
+            <label class="block font-body-sm font-semibold mb-2">Address</label>
+            <input formControlName="addressLine" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md" placeholder="123 Luxury Avenue, Suite 400" type="text" />
+          </div>
+          <div class="col-span-1">
+            <label class="block font-body-sm font-semibold mb-2">City</label>
+            <input formControlName="city" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md" placeholder="New York" type="text" />
+          </div>
+          <div class="col-span-1">
+            <label class="block font-body-sm font-semibold mb-2">Postal Code</label>
+            <input formControlName="postalCode" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md" placeholder="10001" type="text" />
+          </div>
+          <div class="col-span-1">
+            <label class="block font-body-sm font-semibold mb-2">Country</label>
+            <input formControlName="country" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md" placeholder="Egypt" type="text" />
+          </div>
+          <div class="col-span-2">
+            <label class="block font-body-sm font-semibold mb-2">Phone Number</label>
+            <input formControlName="phone" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-body-md" placeholder="+20 10 0000 0000" type="tel" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Payment -->
+      <section [formGroup]="paymentForm">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold">2</div>
+          <h2 class="font-headline-md text-headline-md">Payment Details</h2>
+        </div>
+        <div class="bg-surface-container p-8 rounded-xl border border-outline-variant/30">
+          <div class="mb-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <span class="material-symbols-outlined text-secondary">credit_card</span>
+              <span class="font-body-md font-semibold">Credit or Debit Card</span>
+            </div>
+          </div>
+          <div class="space-y-6">
+            <div>
+              <label class="block font-body-sm font-semibold mb-2">Card Number</label>
+              <div class="relative">
+                <input formControlName="cardNumber" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-price-md tracking-widest pl-12" placeholder="0000 0000 0000 0000" type="text" maxlength="19" />
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40">lock</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-gutter">
+              <div>
+                <label class="block font-body-sm font-semibold mb-2">Expiry Date</label>
+                <input formControlName="expiry" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-price-md" placeholder="MM / YY" type="text" />
+              </div>
+              <div>
+                <label class="block font-body-sm font-semibold mb-2">CVV</label>
+                <input formControlName="cvv" class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 font-price-md" placeholder="***" type="password" maxlength="4" />
+              </div>
+            </div>
+            <div class="pt-4">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input formControlName="saveCard" class="w-5 h-5 rounded border-outline-variant text-secondary focus:ring-secondary" type="checkbox" />
+                <span class="font-body-sm text-on-surface-variant">Save card details for future purchases</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      @if (errorMessage()) {
+        <div class="px-4 py-3 rounded-lg bg-error-container text-on-error-container text-body-sm">{{ errorMessage() }}</div>
+      }
+
+      <!-- CTA -->
+      <div class="flex flex-col items-end gap-6">
+        <p class="font-body-sm text-on-surface-variant text-right max-w-md">
+          By clicking "Place Order", you agree to our <a class="text-secondary underline" href="#">Terms of Service</a> and <a class="text-secondary underline" href="#">Privacy Policy</a>.
+        </p>
+        <button
+          (click)="placeOrder()"
+          [disabled]="placingOrder() || orderPlaced() || items().length === 0"
+          class="w-full md:w-auto px-16 py-5 text-white font-headline-sm text-headline-sm rounded-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-secondary/20 flex items-center justify-center gap-3 disabled:opacity-60"
+          [class.bg-secondary]="!orderPlaced()"
+          [class.bg-green-600]="orderPlaced()">
+          @if (placingOrder()) {
+            <span class="material-symbols-outlined animate-spin">progress_activity</span> Processing...
+          } @else if (orderPlaced()) {
+            <span class="material-symbols-outlined">check_circle</span> Order Confirmed
+          } @else {
+            Place Order
+          }
+        </button>
+        <div class="flex items-center gap-2 text-on-surface-variant/60 font-body-sm">
+          <span class="material-symbols-outlined" style="font-size: 18px;">verified_user</span>
+          Secure SSL Encryption
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
