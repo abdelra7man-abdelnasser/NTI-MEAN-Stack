@@ -1,11 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user-model");
 
-/**
- * verifyToken middleware
- * Checks the Authorization header for a valid Bearer JWT.
- * Attaches the decoded user to req.user for downstream handlers.
- */
+
 const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -31,6 +27,7 @@ const verifyToken = async (req, res, next) => {
 
     req.user = user;
     next();
+
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({

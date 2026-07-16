@@ -14,7 +14,7 @@ const { verifyAdmin } = require("../middlewares/admin-middleware");
 
 const router = express.Router();
 
-// ── Validation rules ──────────────────────────────────────────────────────────
+
 
 const productRules = [
   body("title").trim().notEmpty().withMessage("Title is required")
@@ -25,7 +25,7 @@ const productRules = [
   body("stock").isInt({ min: 0 }).withMessage("Stock must be a non-negative integer"),
 ];
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+// Routes
 
 // NOTE: /search and /filter must be placed BEFORE /:id to avoid route conflicts
 router.get("/search", searchProducts);

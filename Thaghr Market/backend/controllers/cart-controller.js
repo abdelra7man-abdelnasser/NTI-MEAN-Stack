@@ -1,9 +1,9 @@
 const Cart = require("../models/cart-model");
 const Product = require("../models/product-model");
 
-/**
- * Helper: find or create the cart for the current user.
- */
+
+ // Helper: find or create the cart for the current user.
+
 const findOrCreateCart = async (userId) => {
   let cart = await Cart.findOne({ user: userId });
   if (!cart) {
@@ -14,8 +14,7 @@ const findOrCreateCart = async (userId) => {
 
 /**
  * @route  GET /api/v1/cart
- * @access Protected
- * @desc   Return the logged-in user's cart with product details
+
  */
 const getCart = async (req, res) => {
   try {
@@ -35,8 +34,7 @@ const getCart = async (req, res) => {
 
 /**
  * @route  POST /api/v1/cart
- * @access Protected
- * @desc   Add a product to cart. If it already exists, increment quantity.
+ 
  */
 const addToCart = async (req, res) => {
   try {
@@ -79,8 +77,7 @@ const addToCart = async (req, res) => {
 
 /**
  * @route  PATCH /api/v1/cart/:productId
- * @access Protected
- * @desc   Update the quantity of a specific item in the cart
+
  */
 const updateQuantity = async (req, res) => {
   try {
@@ -121,8 +118,7 @@ const updateQuantity = async (req, res) => {
 
 /**
  * @route  DELETE /api/v1/cart/:productId
- * @access Protected
- * @desc   Remove a specific item from the cart
+
  */
 const removeFromCart = async (req, res) => {
   try {
@@ -150,8 +146,7 @@ const removeFromCart = async (req, res) => {
 
 /**
  * @route  DELETE /api/v1/cart
- * @access Protected
- * @desc   Clear all items from the cart
+
  */
 const clearCart = async (req, res) => {
   try {

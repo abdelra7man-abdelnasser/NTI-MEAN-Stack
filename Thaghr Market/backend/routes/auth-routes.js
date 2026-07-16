@@ -4,7 +4,7 @@ const { register, login, logout, refreshToken } = require("../controllers/auth-c
 
 const router = express.Router();
 
-// ── Validation rules ──────────────────────────────────────────────────────────
+
 
 const registerRules = [
   body("name").trim().notEmpty().withMessage("Name is required")
@@ -18,7 +18,7 @@ const loginRules = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+// Routes
 
 router.post("/register", registerRules, register);
 router.post("/login", loginRules, login);

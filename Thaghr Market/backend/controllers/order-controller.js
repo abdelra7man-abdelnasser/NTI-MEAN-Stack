@@ -5,8 +5,7 @@ const Product = require("../models/product-model");
 
 /**
  * @route  POST /api/v1/orders
- * @access Protected
- * @desc   Create an order from the user's current cart, then clear the cart
+ 
  */
 const createOrder = async (req, res) => {
   try {
@@ -76,8 +75,7 @@ const createOrder = async (req, res) => {
 
 /**
  * @route  GET /api/v1/orders
- * @access Protected
- * @desc   Get all orders for the logged-in user
+ 
  */
 const getMyOrders = async (req, res) => {
   try {
@@ -93,8 +91,7 @@ const getMyOrders = async (req, res) => {
 
 /**
  * @route  GET /api/v1/orders/:id
- * @access Protected
- * @desc   Get a single order by ID (user must own it)
+ 
  */
 const getOrderById = async (req, res) => {
   try {
@@ -115,8 +112,7 @@ const getOrderById = async (req, res) => {
 
 /**
  * @route  PATCH /api/v1/orders/:id/cancel
- * @access Protected
- * @desc   Cancel a pending or processing order
+
  */
 const cancelOrder = async (req, res) => {
   try {

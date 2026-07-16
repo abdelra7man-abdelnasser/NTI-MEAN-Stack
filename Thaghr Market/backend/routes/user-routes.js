@@ -10,7 +10,7 @@ const {
 
 const router = express.Router();
 
-// ── Validation rules ──────────────────────────────────────────────────────────
+
 
 const updateProfileRules = [
   body("name").optional().trim()
@@ -25,7 +25,7 @@ const addAddressRules = [
   body("postalCode").trim().notEmpty().withMessage("Postal code is required"),
 ];
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+// Routes 
 
 router.get("/profile", getProfile);
 router.patch("/profile", updateProfileRules, updateProfile);

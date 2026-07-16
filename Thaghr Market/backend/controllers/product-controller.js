@@ -3,8 +3,7 @@ const Product = require("../models/product-model");
 
 /**
  * @route  GET /api/v1/products
- * @access Public
- * @desc   Get all products with pagination support
+ 
  */
 const getAllProducts = async (req, res) => {
   try {
@@ -34,8 +33,7 @@ const getAllProducts = async (req, res) => {
 
 /**
  * @route  GET /api/v1/products/:id
- * @access Public
- * @desc   Get a single product by ID, with category populated
+ 
  */
 const getProductById = async (req, res) => {
   try {
@@ -52,8 +50,7 @@ const getProductById = async (req, res) => {
 
 /**
  * @route  POST /api/v1/products
- * @access Admin only
- * @desc   Create a new product
+
  */
 const createProduct = async (req, res) => {
   try {
@@ -75,7 +72,6 @@ const createProduct = async (req, res) => {
 /**
  * @route  PATCH /api/v1/products/:id
  * @access Admin only
- * @desc   Update a product by ID
  */
 const updateProduct = async (req, res) => {
   try {
@@ -146,8 +142,7 @@ const searchProducts = async (req, res) => {
 
 /**
  * @route  GET /api/v1/products/filter?category=&minPrice=&maxPrice=&rating=
- * @access Public
- * @desc   Task 7 — Filter products by category, price range, and minimum rating
+ 
  */
 const filterProducts = async (req, res) => {
   try {

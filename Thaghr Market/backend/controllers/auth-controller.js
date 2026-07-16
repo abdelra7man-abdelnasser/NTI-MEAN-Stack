@@ -2,31 +2,24 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const User = require("../models/user-model");
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Generate a short-lived access JWT.
- * @param {string} id - User's MongoDB ObjectId
- */
+
+// Generate a short-lived access JWT.
+
 const generateAccessToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-/**
- * Generate a long-lived refresh JWT.
- * @param {string} id - User's MongoDB ObjectId
- */
+// Generate a long-lived refresh JWT.
+
 const generateRefreshToken = (id) =>
   jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
   });
 
-/**
- * Set the refresh token as an HTTP-only cookie.
- * @param {object} res - Express response object
- * @param {string} token - Refresh token string
- */
+// Set the refresh token as an HTTP-only cookie.
+
 const setRefreshCookie = (res, token) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
@@ -36,13 +29,10 @@ const setRefreshCookie = (res, token) => {
   });
 };
 
-// ─── Controllers ──────────────────────────────────────────────────────────────
 
-/**
- * @route  POST /api/v1/auth/register
- * @access Public
- * @desc   Register a new user, return access token + set refresh cookie
- */
+
+// route >> POST /api/v1/auth/register || access >> Public
+ 
 const register = async (req, res) => {
   try {
     // 1. Validate request body
@@ -94,11 +84,8 @@ const register = async (req, res) => {
   }
 };
 
-/**
- * @route  POST /api/v1/auth/login
- * @access Public
- * @desc   Authenticate user, return access token + set refresh cookie
- */
+// route >> POST /api/v1/auth/login || access >> Public
+ 
 const login = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -155,11 +142,8 @@ const login = async (req, res) => {
   }
 };
 
-/**
- * @route  POST /api/v1/auth/logout
- * @access Public
- * @desc   Clear the refresh token cookie
- */
+// route >> POST /api/v1/auth/logout || access >> Public
+
 const logout = (req, res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
@@ -172,11 +156,8 @@ const logout = (req, res) => {
   });
 };
 
-/**
- * @route  POST /api/v1/auth/refresh-token
- * @access Public
- * @desc   Verify refresh cookie → issue a new access token
- */
+// route >> POST /api/v1/auth/refresh-token || access >> Public
+
 const refreshToken = (req, res) => {
   try {
     const token = req.cookies.refreshToken;

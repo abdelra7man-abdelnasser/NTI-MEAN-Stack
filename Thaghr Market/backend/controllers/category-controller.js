@@ -3,7 +3,7 @@ const Category = require("../models/category-model");
 
 /**
  * @route  GET /api/v1/categories
- * @access Public
+ 
  */
 const getAllCategories = async (req, res) => {
   try {
@@ -17,7 +17,7 @@ const getAllCategories = async (req, res) => {
 
 /**
  * @route  GET /api/v1/categories/:id
- * @access Public
+ 
  */
 const getCategoryById = async (req, res) => {
   try {

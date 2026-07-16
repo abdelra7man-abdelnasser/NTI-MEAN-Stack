@@ -2,11 +2,9 @@ const User = require("../models/user-model");
 const Order = require("../models/order-model");
 const Product = require("../models/product-model");
 
-/**
- * @route  GET /api/v1/admin/users
- * @access Admin only
- * @desc   Get all registered users
- */
+
+ 
+ //route >>  GET /api/v1/admin/users || access >> Admin only
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
@@ -17,11 +15,9 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-/**
- * @route  GET /api/v1/admin/users/:id
- * @access Admin only
- * @desc   Get a single user by ID
- */
+
+//  route >> GET /api/v1/admin/users/:id || access >> Admin only
+ 
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate("savedAddresses");
@@ -35,11 +31,8 @@ const getUserById = async (req, res) => {
   }
 };
 
-/**
- * @route  DELETE /api/v1/admin/users/:id
- * @access Admin only
- * @desc   Delete a user by ID
- */
+// route >>  DELETE /api/v1/admin/users/:id || access >> Admin only
+ 
 const deleteUser = async (req, res) => {
   try {
     // Prevent admin from deleting themselves
@@ -58,11 +51,8 @@ const deleteUser = async (req, res) => {
   }
 };
 
-/**
- * @route  GET /api/v1/admin/orders
- * @access Admin only
- * @desc   Get all orders across all users
- */
+// route >> GET /api/v1/admin/orders || access >> Admin only
+
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -76,11 +66,8 @@ const getAllOrders = async (req, res) => {
   } 
 };
 
-/**
- * @route  PATCH /api/v1/admin/orders/:id/status
- * @access Admin only
- * @desc   Update the status of any order
- */
+// route >> PATCH /api/v1/admin/orders/:id/status || access >> Admin only
+
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -110,23 +97,31 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-/**
- * @route  GET /api/v1/admin/stats
- * @access Admin only
- * @desc   Return dashboard summary: counts + total revenue
- */
+// route >> GET /api/v1/admin/stats || access >> Admin only
+
 const getDashboardStats = async (req, res) => {
   try {
+    const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const timeoutMs = Number(process.env.MONGO_QUERY_TIMEOUT_MS) || 5000;
+
+    console.log(`[admin/stats] start id=${requestId} timeoutMs=${timeoutMs}`);
+    console.log(`[admin/stats] connected readyState=`, req?.app?._mongoReadyState);
+
     const [totalUsers, totalProducts, totalOrders, revenueData] = await Promise.all([
-      User.countDocuments(),
-      Product.countDocuments(),
-      Order.countDocuments(),
-      Order.aggregate([
-        { $match: { status: { $ne: "cancelled" } } },
-        { $group: { _id: null, revenue: { $sum: "$totalPrice" } } },
-      ]),
+      User.countDocuments({}, { maxTimeMS: timeoutMs }),
+      Product.countDocuments({}, { maxTimeMS: timeoutMs }),
+      Order.countDocuments({}, { maxTimeMS: timeoutMs }),
+      Order.aggregate(
+        [
+          { $match: { status: { $ne: "cancelled" } } },
+          { $group: { _id: null, revenue: { $sum: "$totalPrice" } } },
+        ],
+        { maxTimeMS: timeoutMs }
+      ),
     ]);
 
+    console.log(`[admin/stats] db complete id=${requestId}`);
+    
     if (totalUsers === 0 && totalProducts === 0 && totalOrders === 0) {
       return res.status(200).json({
         success: true,

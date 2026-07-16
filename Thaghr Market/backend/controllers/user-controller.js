@@ -3,9 +3,8 @@ const User = require("../models/user-model");
 const Address = require("../models/address-model");
 
 /**
- * @route  GET /api/v1/users/profile
- * @access Protected
- * @desc   Return the logged-in user's profile
+ @route  GET /api/v1/users/profile
+ 
  */
 const getProfile = async (req, res) => {
   try {
@@ -22,8 +21,7 @@ const getProfile = async (req, res) => {
 
 /**
  * @route  PATCH /api/v1/users/profile
- * @access Protected
- * @desc   Update name or email of the logged-in user
+ 
  */
 const updateProfile = async (req, res) => {
   try {
@@ -57,8 +55,7 @@ const updateProfile = async (req, res) => {
 
 /**
  * @route  GET /api/v1/users/addresses
- * @access Protected
- * @desc   Get all saved addresses for the logged-in user
+
  */
 const getAddresses = async (req, res) => {
   try {
@@ -72,8 +69,7 @@ const getAddresses = async (req, res) => {
 
 /**
  * @route  POST /api/v1/users/addresses
- * @access Protected
- * @desc   Add a new address for the logged-in user
+ 
  */
 const addAddress = async (req, res) => {
   try {
@@ -112,8 +108,7 @@ const addAddress = async (req, res) => {
 
 /**
  * @route  DELETE /api/v1/users/addresses/:id
- * @access Protected
- * @desc   Delete a specific address belonging to the logged-in user
+
  */
 const deleteAddress = async (req, res) => {
   try {
