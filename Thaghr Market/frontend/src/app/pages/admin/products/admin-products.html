@@ -1,0 +1,152 @@
+<main class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-10">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+    <div>
+      <div class="flex items-center gap-2 text-on-surface-variant text-body-sm mb-1">
+        <a routerLink="/" class="hover:text-secondary transition-colors">Home</a>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span>Admin</span>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-primary">Products</span>
+      </div>
+      <h1 class="font-headline-md text-headline-md font-bold">Manage Products</h1>
+      <p class="text-on-surface-variant font-body-sm mt-1">{{ products().length }} products total</p>
+    </div>
+    <div class="flex gap-3">
+      <a routerLink="/admin/categories"
+        class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg font-body-sm hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined text-[18px]">category</span> Categories
+      </a>
+      <button (click)="openCreate()"
+        class="flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[18px]">add</span> Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- Feedback messages -->
+  @if (successMsg()) {
+    <div class="mb-4 px-4 py-3 bg-green-100 text-green-800 rounded-lg text-body-sm flex items-center gap-2">
+      <span class="material-symbols-outlined text-[18px]">check_circle</span> {{ successMsg() }}
+    </div>
+  }
+
+  <!-- Modal overlay -->
+  @if (showForm()) {
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeForm()">
+      <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-8" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-headline-sm text-headline-sm font-bold">{{ editId() ? 'Edit Product' : 'New Product' }}</h2>
+          <button (click)="closeForm()" class="text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        @if (errorMsg()) {
+          <div class="mb-4 px-4 py-3 bg-error-container text-on-error-container rounded-lg text-body-sm">{{ errorMsg() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+          <div>
+            <label class="block font-body-sm font-semibold mb-1">Title *</label>
+            <input formControlName="title" type="text" class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary" placeholder="Product title" />
+          </div>
+          <div>
+            <label class="block font-body-sm font-semibold mb-1">Description *</label>
+            <textarea formControlName="description" rows="3" class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary resize-none" placeholder="Product description"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block font-body-sm font-semibold mb-1">Price ($) *</label>
+              <input formControlName="price" type="number" min="0" step="0.01" class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary" />
+            </div>
+            <div>
+              <label class="block font-body-sm font-semibold mb-1">Stock *</label>
+              <input formControlName="stock" type="number" min="0" class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-body-sm font-semibold mb-1">Category *</label>
+            <select formControlName="category" class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary bg-white">
+              <option value="">Select category</option>
+              @for (cat of categories(); track cat._id) {
+                <option [value]="cat._id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block font-body-sm font-semibold mb-1">Image URL</label>
+            <input formControlName="imageUrl" type="url" class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary" placeholder="https://picsum.photos/seed/example/500/500" />
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button type="button" (click)="closeForm()" class="flex-1 py-3 border border-outline-variant rounded-lg font-bold text-body-sm hover:bg-surface-container-low transition-colors">Cancel</button>
+            <button type="submit" [disabled]="saving()" class="flex-1 py-3 bg-secondary text-white rounded-lg font-bold text-body-sm hover:opacity-90 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+              @if (saving()) { <span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span> } {{ saving() ? 'Saving...' : (editId() ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Products table -->
+  @if (loading()) {
+    <div class="space-y-3">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="h-16 bg-surface-container rounded-lg animate-pulse"></div>
+      }
+    </div>
+  } @else {
+    <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+      <table class="w-full text-left">
+        <thead class="bg-surface-container-low border-b border-outline-variant">
+          <tr class="text-on-surface-variant text-[11px] uppercase tracking-wider font-bold">
+            <th class="px-4 py-3">Product</th>
+            <th class="px-4 py-3 hidden sm:table-cell">Category</th>
+            <th class="px-4 py-3">Price</th>
+            <th class="px-4 py-3 hidden md:table-cell">Stock</th>
+            <th class="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/30">
+          @for (p of products(); track p._id) {
+            <tr class="hover:bg-surface-container-low/50 transition-colors">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <img [src]="p.imageUrl ?? 'https://picsum.photos/seed/' + p._id + '/80/80'"
+                    [alt]="p.title" class="w-10 h-10 rounded-lg object-cover border border-outline-variant/30" />
+                  <div>
+                    <p class="font-body-md font-bold text-primary line-clamp-1">{{ p.title }}</p>
+                    <p class="font-body-sm text-on-surface-variant text-[12px]">{{ p._id.slice(-8) }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3 hidden sm:table-cell">
+                <span class="text-body-sm text-on-surface-variant">{{ categoryName(p) }}</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="font-price-md text-price-md text-secondary">${{ p.price.toFixed(2) }}</span>
+              </td>
+              <td class="px-4 py-3 hidden md:table-cell">
+                <span [class]="'text-body-sm font-bold ' + (p.stock && p.stock > 0 ? 'text-green-700' : 'text-error')">
+                  {{ p.stock ?? 0 }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button (click)="openEdit(p)" class="p-2 text-on-surface-variant hover:text-secondary transition-colors rounded-lg hover:bg-surface-container-low">
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button (click)="delete(p._id)" class="p-2 text-on-surface-variant hover:text-error transition-colors rounded-lg hover:bg-error-container">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</main>

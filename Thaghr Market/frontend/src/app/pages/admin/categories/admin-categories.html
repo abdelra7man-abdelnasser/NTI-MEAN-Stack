@@ -1,0 +1,126 @@
+<main class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-10">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+    <div>
+      <div class="flex items-center gap-2 text-on-surface-variant text-body-sm mb-1">
+        <a routerLink="/" class="hover:text-secondary transition-colors">Home</a>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span>Admin</span>
+        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+        <span class="text-primary">Categories</span>
+      </div>
+      <h1 class="font-headline-md text-headline-md font-bold">Manage Categories</h1>
+      <p class="text-on-surface-variant font-body-sm mt-1">{{ categories().length }} categories</p>
+    </div>
+    <div class="flex gap-3">
+      <a routerLink="/admin/products"
+        class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg font-body-sm hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined text-[18px]">inventory_2</span> Products
+      </a>
+      <button (click)="openCreate()"
+        class="flex items-center gap-2 bg-secondary text-white px-5 py-2.5 rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[18px]">add</span> Add Category
+      </button>
+    </div>
+  </div>
+
+  @if (successMsg()) {
+    <div class="mb-4 px-4 py-3 bg-green-100 text-green-800 rounded-lg text-body-sm flex items-center gap-2">
+      <span class="material-symbols-outlined text-[18px]">check_circle</span> {{ successMsg() }}
+    </div>
+  }
+
+  <!-- Modal -->
+  @if (showForm()) {
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeForm()">
+      <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-8" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-headline-sm text-headline-sm font-bold">{{ editId() ? 'Edit Category' : 'New Category' }}</h2>
+          <button (click)="closeForm()" class="text-on-surface-variant hover:text-primary">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        @if (errorMsg()) {
+          <div class="mb-4 px-4 py-3 bg-error-container text-on-error-container rounded-lg text-body-sm">{{ errorMsg() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+          <div>
+            <label class="block font-body-sm font-semibold mb-1">Name *</label>
+            <input formControlName="name" type="text"
+              class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary"
+              placeholder="e.g. Electronics" />
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+              <p class="text-error text-[12px] mt-1">Name must be 2–50 characters.</p>
+            }
+          </div>
+          <div>
+            <label class="block font-body-sm font-semibold mb-1">Description</label>
+            <textarea formControlName="description" rows="2"
+              class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary resize-none"
+              placeholder="Optional description"></textarea>
+          </div>
+          <div>
+            <label class="block font-body-sm font-semibold mb-1">Image URL</label>
+            <input formControlName="imageUrl" type="url"
+              class="w-full border border-outline-variant rounded-lg px-4 py-2.5 font-body-md outline-none focus:ring-2 focus:ring-secondary"
+              placeholder="https://..." />
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button type="button" (click)="closeForm()" class="flex-1 py-3 border border-outline-variant rounded-lg font-bold text-body-sm hover:bg-surface-container-low transition-colors">Cancel</button>
+            <button type="submit" [disabled]="saving()"
+              class="flex-1 py-3 bg-secondary text-white rounded-lg font-bold text-body-sm hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2">
+              @if (saving()) { <span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span> }
+              {{ saving() ? 'Saving...' : (editId() ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Categories grid -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="h-24 bg-surface-container rounded-xl animate-pulse"></div>
+      }
+    </div>
+  } @else if (categories().length === 0) {
+    <div class="text-center py-20 text-on-surface-variant">
+      <span class="material-symbols-outlined text-[56px] opacity-30 block mb-3">category</span>
+      <p class="font-headline-sm">No categories yet</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
+      @for (cat of categories(); track cat._id) {
+        <div class="bg-white border border-outline-variant rounded-xl p-5 flex items-center gap-4 hover:shadow-md transition-shadow group">
+          @if (cat.imageUrl) {
+            <img [src]="cat.imageUrl" [alt]="cat.name" class="w-14 h-14 rounded-lg object-cover border border-outline-variant/30 shrink-0" />
+          } @else {
+            <div class="w-14 h-14 rounded-lg bg-surface-container flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[28px] text-on-surface-variant">category</span>
+            </div>
+          }
+          <div class="flex-1 min-w-0">
+            <p class="font-body-md font-bold text-primary truncate">{{ cat.name }}</p>
+            @if (cat.description) {
+              <p class="font-body-sm text-on-surface-variant truncate">{{ cat.description }}</p>
+            }
+            <p class="font-data-label text-data-label text-on-surface-variant/60 mt-0.5">ID: {{ cat._id.slice(-8) }}</p>
+          </div>
+          <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button (click)="openEdit(cat)" class="p-1.5 text-on-surface-variant hover:text-secondary transition-colors rounded">
+              <span class="material-symbols-outlined text-[18px]">edit</span>
+            </button>
+            <button (click)="delete(cat._id, cat.name)" class="p-1.5 text-on-surface-variant hover:text-error transition-colors rounded">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</main>

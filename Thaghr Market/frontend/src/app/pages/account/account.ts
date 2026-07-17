@@ -1,110 +1,87 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService }  from '../../core/services/auth.service';
 import { OrderService } from '../../core/services/order.service';
+import { UserService }  from '../../core/services/user.service';
 import { Order, OrderStatus } from '../../core/models/order.model';
 
-type AccountSection = 'dashboard' | 'orders' | 'wishlist' | 'addresses' | 'payment' | 'security' | 'settings';
-
-// Fallback data uses backend lowercase status values
-const FALLBACK_ORDERS: Order[] = [
-  {
-    _id: '1',
-    user: 'me',
-    items: [],
-    shippingAddress: { street: '', city: '', country: '', postalCode: '' },
-    paymentInfo: { method: 'card', paid: true },
-    totalPrice: 1250,
-    status: 'delivered',
-    createdAt: '2024-10-24'
-  },
-  {
-    _id: '2',
-    user: 'me',
-    items: [],
-    shippingAddress: { street: '', city: '', country: '', postalCode: '' },
-    paymentInfo: { method: 'card', paid: true },
-    totalPrice: 4300,
-    status: 'processing',
-    createdAt: '2024-10-18'
-  },
-  {
-    _id: '3',
-    user: 'me',
-    items: [],
-    shippingAddress: { street: '', city: '', country: '', postalCode: '' },
-    paymentInfo: { method: 'card', paid: true },
-    totalPrice: 890,
-    status: 'delivered',
-    createdAt: '2024-09-30'
-  }
-];
+type AccountSection = 'orders' | 'profile' | 'addresses';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './account.html'
 })
 export class Account implements OnInit {
   private readonly auth         = inject(AuthService);
   private readonly orderService = inject(OrderService);
+  private readonly userService  = inject(UserService);
+  private readonly fb           = inject(FormBuilder);
 
-  readonly currentUser    = this.auth.currentUser;
-  readonly activeSection  = signal<AccountSection>('orders');
-  readonly orders         = signal<Order[]>(FALLBACK_ORDERS);
-  readonly loading        = signal(true);
-  readonly ctfPanelVisible = signal(true);
-  readonly revalidating   = signal(false);
+  readonly currentUser   = this.auth.currentUser;
+  readonly activeSection = signal<AccountSection>('orders');
+  readonly orders        = signal<Order[]>([]);
+  readonly loading       = signal(true);
+  readonly savingProfile = signal(false);
+  readonly profileSaved  = signal(false);
+  readonly profileError  = signal<string | null>(null);
+
+  readonly profileForm = this.fb.nonNullable.group({
+    name:  [this.currentUser()?.name ?? '', [Validators.required, Validators.minLength(2)]],
+    email: [this.currentUser()?.email ?? '', [Validators.required, Validators.email]],
+  });
 
   ngOnInit(): void {
-    // GET /api/v1/orders  → { success, orders: [...] }
     this.orderService
       .getMyOrders()
-      .pipe(catchError(() => of(null)))
+      .pipe(catchError(() => of([] as Order[])))
       .subscribe((orders) => {
-        if (orders && orders.length) this.orders.set(orders);
+        this.orders.set(orders);
         this.loading.set(false);
       });
-  }
 
-  setSection(section: AccountSection): void {
-    this.activeSection.set(section);
-  }
-
-  dismissCtfPanel(): void {
-    this.ctfPanelVisible.set(false);
-  }
-
-  revalidateSession(): void {
-    this.revalidating.set(true);
-    setTimeout(() => this.revalidating.set(false), 1200);
-  }
-
-  // Backend returns lowercase status: pending, processing, shipped, delivered, cancelled
-  statusClasses(status: OrderStatus): string {
-    switch (status) {
-      case 'delivered':  return 'bg-green-100 text-green-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      case 'shipped':    return 'bg-purple-100 text-purple-800';
-      case 'cancelled':  return 'bg-red-100 text-red-800';
-      default:           return 'bg-surface-container-highest text-on-surface-variant';
+    // Keep form in sync with latest user data
+    const u = this.currentUser();
+    if (u) {
+      this.profileForm.patchValue({ name: u.name, email: u.email });
     }
   }
 
-  statusDotClasses(status: OrderStatus): string {
-    switch (status) {
-      case 'delivered':  return 'bg-green-600';
-      case 'processing': return 'bg-blue-600';
-      case 'shipped':    return 'bg-purple-600';
-      case 'cancelled':  return 'bg-red-600';
-      default:           return 'bg-outline';
-    }
+  setSection(s: AccountSection): void { this.activeSection.set(s); }
+
+  saveProfile(): void {
+    if (this.profileForm.invalid) { this.profileForm.markAllAsTouched(); return; }
+    this.savingProfile.set(true);
+    this.profileError.set(null);
+    this.userService.updateProfile(this.profileForm.getRawValue()).subscribe({
+      next: () => {
+        this.savingProfile.set(false);
+        this.profileSaved.set(true);
+        setTimeout(() => this.profileSaved.set(false), 2500);
+      },
+      error: (err) => {
+        this.savingProfile.set(false);
+        this.profileError.set(err?.error?.message ?? 'Failed to update profile.');
+      },
+    });
   }
 
-  /** Capitalize status for display */
-  statusLabel(status: OrderStatus): string {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+  statusClasses(s: OrderStatus): string {
+    return { delivered:'bg-green-100 text-green-800', processing:'bg-blue-100 text-blue-800',
+             shipped:'bg-purple-100 text-purple-800', cancelled:'bg-red-100 text-red-800',
+             pending:'bg-yellow-100 text-yellow-800' }[s] ?? 'bg-surface-container-highest text-on-surface-variant';
+  }
+
+  statusDotClasses(s: OrderStatus): string {
+    return { delivered:'bg-green-600', processing:'bg-blue-600', shipped:'bg-purple-600',
+             cancelled:'bg-red-600', pending:'bg-yellow-500' }[s] ?? 'bg-outline';
+  }
+
+  statusLabel(s: OrderStatus): string {
+    return s.charAt(0).toUpperCase() + s.slice(1);
   }
 }

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard }  from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -8,9 +9,13 @@ export const routes: Routes = [
     title: 'Thaghr Market - Premium Marketplace'
   },
   {
+    path: 'products',
+    loadComponent: () => import('./pages/home/home').then((m) => m.Home),
+    title: 'Products | Thaghr Market'
+  },
+  {
     path: 'products/:id',
-    loadComponent: () =>
-      import('./pages/product-detail/product-detail').then((m) => m.ProductDetail),
+    loadComponent: () => import('./pages/product-detail/product-detail').then((m) => m.ProductDetail),
     title: 'Product Details | Thaghr Market'
   },
   {
@@ -32,8 +37,21 @@ export const routes: Routes = [
   {
     path: 'account',
     loadComponent: () => import('./pages/account/account').then((m) => m.Account),
-    title: 'Account Portal | Thaghr Market',
+    title: 'My Account | Thaghr Market',
     canActivate: [authGuard]
+  },
+  // ── Admin ──────────────────────────────────────────────────────────────────
+  {
+    path: 'admin/products',
+    loadComponent: () => import('./pages/admin/products/admin-products').then((m) => m.AdminProducts),
+    title: 'Manage Products | Admin',
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'admin/categories',
+    loadComponent: () => import('./pages/admin/categories/admin-categories').then((m) => m.AdminCategories),
+    title: 'Manage Categories | Admin',
+    canActivate: [authGuard, adminGuard]
   },
   { path: '**', redirectTo: '' }
 ];

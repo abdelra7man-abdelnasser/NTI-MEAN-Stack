@@ -1,80 +1,134 @@
-<header class="bg-primary-container/85 backdrop-blur-md sticky top-0 z-40 border-b border-outline-variant/10 shadow-sm">
+<header class="bg-primary-container/95 backdrop-blur-md sticky top-0 z-40 border-b border-outline-variant/10 shadow-sm">
   <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto h-16 md:h-20 gap-2">
+
+    <!-- Left: logo + nav -->
     <div class="flex items-center gap-4 md:gap-gutter min-w-0">
-      <button
-        (click)="toggleMobileMenu()"
-        class="md:hidden text-on-primary-container p-2 -ml-2 shrink-0"
-        [attr.aria-expanded]="mobileMenuOpen()"
-        aria-label="Toggle menu">
+      <button (click)="toggleMobileMenu()" class="md:hidden text-on-primary-container p-2 -ml-2 shrink-0" aria-label="Toggle menu">
         <span class="material-symbols-outlined">{{ mobileMenuOpen() ? 'close' : 'menu' }}</span>
       </button>
-      <a routerLink="/" (click)="closeMobileMenu()" class="font-headline-md text-[18px] md:text-headline-md font-bold text-on-primary-container truncate">Thaghr Market</a>
-      <nav class="hidden md:flex gap-6">
-        <a routerLink="/" routerLinkActive="text-secondary font-bold border-b-2 border-secondary"
+      <a routerLink="/" (click)="closeMobileMenu()" class="font-headline-md text-[18px] md:text-headline-md font-bold text-on-primary-container truncate">
+        Thaghr Market
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-6">
+        <a routerLink="/" routerLinkActive="text-secondary font-bold"
            [routerLinkActiveOptions]="{ exact: true }"
-           class="text-on-primary-container/80 hover:text-secondary transition-colors font-body-sm text-body-sm">Explore</a>
-        <a routerLink="/" class="text-on-primary-container/80 hover:text-secondary transition-colors font-body-sm text-body-sm">Categories</a>
+           class="text-on-primary-container/80 hover:text-secondary transition-colors font-body-sm text-body-sm">
+          Home
+        </a>
+
+        <!-- Categories dropdown -->
+        <div class="relative">
+          <button (click)="toggleCatMenu()"
+            class="flex items-center gap-1 text-on-primary-container/80 hover:text-secondary transition-colors font-body-sm text-body-sm">
+            Categories
+            <span class="material-symbols-outlined text-[16px]">{{ catMenuOpen() ? 'expand_less' : 'expand_more' }}</span>
+          </button>
+          @if (catMenuOpen()) {
+            <div class="absolute top-full left-0 mt-2 w-52 bg-white border border-outline-variant rounded-xl shadow-xl py-2 z-50">
+              <button (click)="filterByCategory('')"
+                class="w-full text-left px-4 py-2 font-body-sm text-body-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                All Products
+              </button>
+              <div class="h-px bg-outline-variant/30 my-1"></div>
+              @for (cat of categories(); track cat._id) {
+                <button (click)="filterByCategory(cat._id)"
+                  class="w-full text-left px-4 py-2 font-body-sm text-body-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                  {{ cat.name }}
+                </button>
+              }
+            </div>
+          }
+        </div>
       </nav>
     </div>
 
-    <div class="flex items-center gap-3 md:gap-6 shrink-0">
+    <!-- Right: search + cart + user -->
+    <div class="flex items-center gap-3 md:gap-4 shrink-0">
+      <!-- Desktop search -->
       <div class="relative hidden lg:block">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-primary-container/60">search</span>
-        <input
-          #searchInput
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-primary-container/60 text-[18px]">search</span>
+        <input #searchInput
           (keyup.enter)="onSearch(searchInput.value)"
-          class="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-body-sm font-body-sm w-64 focus:ring-2 focus:ring-secondary"
-          placeholder="Search premium items..."
+          class="bg-surface-container-low border-none rounded-lg pl-9 pr-4 py-2 text-body-sm font-body-sm w-56 focus:ring-2 focus:ring-secondary outline-none"
+          placeholder="Search products..."
           type="text" />
       </div>
 
-      <div class="flex items-center gap-3 md:gap-4">
-        <button
-          (click)="toggleMobileMenu()"
-          class="lg:hidden text-on-primary-container/80 hover:text-secondary transition-colors"
-          aria-label="Search">
-          <span class="material-symbols-outlined">search</span>
-        </button>
+      <!-- Mobile search icon -->
+      <button (click)="toggleMobileMenu()" class="lg:hidden text-on-primary-container/80 hover:text-secondary transition-colors">
+        <span class="material-symbols-outlined">search</span>
+      </button>
 
-        <button routerLink="/cart" (click)="closeMobileMenu()" class="text-on-primary-container/80 hover:text-secondary transition-colors relative">
-          <span class="material-symbols-outlined">shopping_cart</span>
-          @if (cartCount() > 0) {
-            <span class="absolute -top-1 -right-1 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{{ cartCount() }}</span>
-          }
-        </button>
+      <!-- Cart -->
+      <a routerLink="/cart" (click)="closeMobileMenu()" class="text-on-primary-container/80 hover:text-secondary transition-colors relative">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        @if (cartCount() > 0) {
+          <span class="absolute -top-1 -right-1 bg-secondary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+            {{ cartCount() }}
+          </span>
+        }
+      </a>
 
-        @if (isAuthenticated()) {
-          <button routerLink="/account" (click)="closeMobileMenu()" class="flex items-center gap-2 font-body-sm text-body-sm font-bold text-on-primary-container hover:text-secondary transition-colors">
+      <!-- User area -->
+      @if (isAuthenticated()) {
+        <div class="flex items-center gap-2">
+          <a routerLink="/account" (click)="closeMobileMenu()"
+            class="flex items-center gap-2 font-body-sm text-body-sm font-bold text-on-primary-container hover:text-secondary transition-colors">
             <span class="material-symbols-outlined text-[20px]">account_circle</span>
             <span class="hidden lg:inline">{{ currentUser()?.name }}</span>
-          </button>
+          </a>
+          @if (isAdmin()) {
+            <div class="hidden lg:flex items-center gap-1 bg-secondary/10 border border-secondary/30 rounded-lg px-3 py-1">
+              <span class="material-symbols-outlined text-secondary text-[14px]">admin_panel_settings</span>
+              <a routerLink="/admin/products" class="text-secondary font-bold text-[12px] hover:underline">Products</a>
+              <span class="text-secondary/40 text-[10px]">|</span>
+              <a routerLink="/admin/categories" class="text-secondary font-bold text-[12px] hover:underline">Categories</a>
+            </div>
+          }
           <button (click)="logout()" class="text-on-primary-container/60 hover:text-secondary transition-colors" title="Sign out">
             <span class="material-symbols-outlined text-[20px]">logout</span>
           </button>
-        } @else {
-          <button routerLink="/login" (click)="closeMobileMenu()" class="bg-secondary text-white px-4 md:px-6 py-2 rounded font-body-sm text-body-sm font-semibold hover:opacity-90 transition-all active:scale-95 whitespace-nowrap">Sign In</button>
-        }
-      </div>
+        </div>
+      } @else {
+        <a routerLink="/login" (click)="closeMobileMenu()"
+          class="bg-secondary text-white px-4 md:px-6 py-2 rounded font-body-sm text-body-sm font-semibold hover:opacity-90 transition-all active:scale-95 whitespace-nowrap">
+          Sign In
+        </a>
+      }
     </div>
   </div>
 
-  <!-- Mobile dropdown: nav links + search, shown below lg -->
+  <!-- Mobile dropdown -->
   @if (mobileMenuOpen()) {
-    <div class="lg:hidden border-t border-outline-variant/10 bg-primary-container px-margin-mobile py-4 space-y-4">
+    <div class="md:hidden border-t border-outline-variant/10 bg-primary-container px-margin-mobile py-4 space-y-4">
+      <!-- Mobile search -->
       <div class="relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-primary-container/60">search</span>
-        <input
-          #mobileSearchInput
+        <input #mobileSearchInput
           (keyup.enter)="onSearch(mobileSearchInput.value)"
-          class="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-3 text-body-sm font-body-sm w-full focus:ring-2 focus:ring-secondary"
-          placeholder="Search premium items..."
+          class="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-3 text-body-sm font-body-sm w-full focus:ring-2 focus:ring-secondary outline-none"
+          placeholder="Search products..."
           type="text" />
       </div>
-      <nav class="md:hidden flex flex-col gap-1">
-        <a routerLink="/" (click)="closeMobileMenu()" routerLinkActive="text-secondary font-bold"
-           [routerLinkActiveOptions]="{ exact: true }"
-           class="text-on-primary-container/90 py-2 font-body-md text-body-md">Explore</a>
-        <a routerLink="/" (click)="closeMobileMenu()" class="text-on-primary-container/90 py-2 font-body-md text-body-md">Categories</a>
+
+      <!-- Mobile nav -->
+      <nav class="flex flex-col gap-1">
+        <a routerLink="/" (click)="closeMobileMenu()" class="text-on-primary-container/90 py-2 font-body-md text-body-md">Home</a>
+        <div class="text-on-primary-container/70 font-body-sm text-body-sm font-bold uppercase tracking-wider pt-2 pb-1">Categories</div>
+        <button (click)="filterByCategory('')" class="text-left text-on-primary-container/90 py-1.5 pl-2 font-body-sm text-body-sm">All Products</button>
+        @for (cat of categories(); track cat._id) {
+          <button (click)="filterByCategory(cat._id)" class="text-left text-on-primary-container/90 py-1.5 pl-2 font-body-sm text-body-sm">
+            {{ cat.name }}
+          </button>
+        }
+        @if (isAdmin()) {
+          <div class="h-px bg-outline-variant/20 my-2"></div>
+          <div class="text-secondary font-bold text-body-sm uppercase tracking-wider pb-1">Admin</div>
+          <a routerLink="/admin/products" (click)="closeMobileMenu()" class="text-secondary py-1.5 pl-2 font-body-sm">Manage Products</a>
+          <a routerLink="/admin/categories" (click)="closeMobileMenu()" class="text-secondary py-1.5 pl-2 font-body-sm">Manage Categories</a>
+        }
       </nav>
     </div>
   }
